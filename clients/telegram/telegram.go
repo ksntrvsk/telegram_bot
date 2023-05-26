@@ -18,8 +18,10 @@ type Client struct {
 }
 
 const (
-	getUpdatesMethod  = "getUpdates"
-	sendMessageMethod = "sendMessage"
+	getUpdatesMethod   = "getUpdates"
+	sendMessageMethod  = "sendMessage"
+	sendPhotoMethod    = "sendPhoto"
+	sendLocationMethod = "sendLocation"
 )
 
 func New(host string, token string) *Client {
@@ -41,13 +43,13 @@ func (client *Client) Updates(offset int, limit int) ([]Update, error) {
 		return nil, myErr("can't get data from request", err)
 	}
 
-	var responce UpdatesResponce
+	var response UpdatesResponce
 
-	if err := json.Unmarshal(data, &responce); err != nil {
+	if err := json.Unmarshal(data, &response); err != nil {
 		return nil, myErr("can't decode json", err)
 	}
 
-	return responce.Result, nil
+	return response.Result, nil
 }
 
 func (client *Client) SendMessage(chatID int, text string) error {
@@ -57,10 +59,6 @@ func (client *Client) SendMessage(chatID int, text string) error {
 		Host:   client.host,
 		Path:   path.Join(client.basePath, sendMessageMethod),
 	}
-
-	query := url.Values{}
-	query.Add("chatID", strconv.Itoa(chatID))
-	query.Add("text", text)
 
 	body, _ := json.Marshal(map[string]string{
 		"chat_id": strconv.Itoa(chatID),
@@ -80,6 +78,35 @@ func (client *Client) SendMessage(chatID int, text string) error {
 	defer response.Body.Close()
 
 	body, err = io.ReadAll(response.Body)
+	if err != nil {
+		return myErr("can't send message", err)
+	}
+
+	return nil
+}
+
+func (client *Client) SendPhoto(chatID int, photo string) error {
+
+	query := url.Values{}
+	query.Add("chat_id", strconv.Itoa(chatID))
+	query.Add("photo", photo)
+
+	_, err := client.doRequest(sendPhotoMethod, query)
+	if err != nil {
+		return myErr("can't send message", err)
+	}
+
+	return nil
+}
+
+func (client *Client) SendLocation(chatID int, latitude float64, longitude float64) error {
+
+	query := url.Values{}
+	query.Add("chat_id", strconv.Itoa(chatID))
+	query.Add("latitude", strconv.FormatFloat(latitude, 'E', -1, 64))
+	query.Add("longitude", strconv.FormatFloat(longitude, 'E', -1, 64))
+
+	_, err := client.doRequest(sendLocationMethod, query)
 	if err != nil {
 		return myErr("can't send message", err)
 	}
@@ -132,7 +159,7 @@ func myErr(msg string, err error) error {
 	query.Add("chatID", strconv.Itoa(chatID))
 	query.Add("text", text)
 
-	_, err := client.doRequest(sendMessageMethod, body)
+	_, err := client.doRequest(sendMessageMethod, query)
 	if err != nil {
 		return myErr("can't send message", err)
 	}

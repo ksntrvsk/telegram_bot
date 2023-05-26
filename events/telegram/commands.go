@@ -3,11 +3,16 @@ package telegram
 import (
 	"log"
 	"strings"
+	"telegram_bot/clients/advice"
+	"telegram_bot/clients/unsplash"
 )
 
 const (
-	StartCmd = "/start"
-	HelpCmd  = "/help"
+	StartCmd    = "/start"
+	HelpCmd     = "/help"
+	AdviceCmd   = "/advice"
+	ImageCmd    = "/image"
+	LocationCmd = "/location"
 )
 
 func (processor *EventProcessor) doCmd(text string, chatID int, userName string) error {
@@ -21,6 +26,12 @@ func (processor *EventProcessor) doCmd(text string, chatID int, userName string)
 		processor.sendHelp(chatID)
 	case StartCmd:
 		processor.sendHello(chatID)
+	case AdviceCmd:
+		processor.sendAdvice(chatID)
+	case ImageCmd:
+		processor.sendImage(chatID)
+	case LocationCmd:
+		processor.sendLocation(chatID)
 	default:
 		processor.tgClient.SendMessage(chatID, msgUnknownCommand)
 	}
@@ -34,4 +45,29 @@ func (processor *EventProcessor) sendHelp(chatID int) error {
 
 func (processor *EventProcessor) sendHello(chatID int) error {
 	return processor.tgClient.SendMessage(chatID, msgHello)
+}
+
+func (processor *EventProcessor) sendAdvice(chatID int) error {
+	adviceClient := advice.New("api.adviceslip.com")
+
+	advice, err := adviceClient.Advice()
+	if err != nil {
+		return err
+	}
+	return processor.tgClient.SendMessage(chatID, advice)
+}
+
+func (processor *EventProcessor) sendImage(chatID int) error {
+	unsplashClient := unsplash.New("api.unsplash.com")
+
+	image, err := unsplashClient.Image("PddqgB4HPiCugH38YXN9a8Y4s0nkSSCGg7AArTC7VWs")
+
+	if err != nil {
+		return err
+	}
+	return processor.tgClient.SendPhoto(chatID, image)
+}
+
+func (processor *EventProcessor) sendLocation(chatID int) error {
+	return processor.tgClient.SendMessage(chatID, msgLocation)
 }

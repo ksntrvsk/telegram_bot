@@ -3,6 +3,7 @@ package telegram
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"telegram_bot/clients/telegram"
 	"telegram_bot/events"
 )
@@ -60,10 +61,14 @@ func (eventProcessor *EventProcessor) processMessage(event events.Event) error {
 		return myErr("can't process message", err)
 	}
 
-	fmt.Println(meta)
-
-	if err := eventProcessor.doCmd(event.Text, meta.ChatID, meta.Username); err != nil {
-		return myErr("can't process message: %w", err)
+	if strings.Contains(event.Text, "/") {
+		if err := eventProcessor.doCmd(event.Text, meta.ChatID, meta.Username); err != nil {
+			return myErr("can't process message: %w", err)
+		}
+	} else {
+		if err := eventProcessor.sendTestLocation(event.Text, meta.ChatID, meta.Username); err != nil {
+			return myErr("can't process message: %w", err)
+		}
 	}
 
 	return nil

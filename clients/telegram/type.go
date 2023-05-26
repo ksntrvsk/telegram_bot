@@ -11,9 +11,10 @@ type Update struct {
 }
 
 type Message struct {
-	From From   `json:"from"`
-	Chat Chat   `json:"chat"`
-	Text string `json:"text"`
+	From  From   `json:"from"`
+	Chat  Chat   `json:"chat"`
+	Text  string `json:"text"`
+	Photo string `json:"photo"`
 }
 
 type From struct {
