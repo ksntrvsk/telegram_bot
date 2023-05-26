@@ -8,11 +8,12 @@ import (
 )
 
 const (
-	StartCmd    = "/start"
-	HelpCmd     = "/help"
-	AdviceCmd   = "/advice"
-	ImageCmd    = "/image"
-	LocationCmd = "/location"
+	StartCmd           = "/start"
+	HelpCmd            = "/help"
+	AdviceCmd          = "/advice"
+	ImageCmd           = "/image"
+	LocationCmd        = "/location"
+	GenerationImageCmd = "/generation"
 )
 
 func (processor *EventProcessor) doCmd(text string, chatID int, userName string) error {
@@ -32,6 +33,8 @@ func (processor *EventProcessor) doCmd(text string, chatID int, userName string)
 		processor.sendImage(chatID)
 	case LocationCmd:
 		processor.sendLocation(chatID)
+	case GenerationImageCmd:
+		processor.sendGenerationImage(chatID)
 	default:
 		processor.tgClient.SendMessage(chatID, msgUnknownCommand)
 	}
@@ -60,14 +63,18 @@ func (processor *EventProcessor) sendAdvice(chatID int) error {
 func (processor *EventProcessor) sendImage(chatID int) error {
 	unsplashClient := unsplash.New("api.unsplash.com")
 
-	image, err := unsplashClient.Image("PddqgB4HPiCugH38YXN9a8Y4s0nkSSCGg7AArTC7VWs")
-
+	image, err := unsplashClient.Image("")
 	if err != nil {
 		return err
 	}
+
 	return processor.tgClient.SendPhoto(chatID, image)
 }
 
 func (processor *EventProcessor) sendLocation(chatID int) error {
 	return processor.tgClient.SendMessage(chatID, msgLocation)
+}
+
+func (processor *EventProcessor) sendGenerationImage(chatID int) error {
+	return processor.tgClient.SendMessage(chatID, msgGenerationImage)
 }

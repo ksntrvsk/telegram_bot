@@ -22,10 +22,10 @@ func New(host string) *Client {
 	}
 }
 
-func (client *Client) Image(token string) (string, error) {
+func (client *Client) Image(clientID string) (string, error) {
 
 	query := url.Values{}
-	query.Add("client_id", token)
+	query.Add("client_id", clientID)
 
 	url := url.URL{
 		Scheme: "https",

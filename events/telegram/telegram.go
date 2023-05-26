@@ -66,10 +66,20 @@ func (eventProcessor *EventProcessor) processMessage(event events.Event) error {
 			return myErr("can't process message: %w", err)
 		}
 	} else {
-		if err := eventProcessor.sendTestLocation(event.Text, meta.ChatID, meta.Username); err != nil {
+		if err := eventProcessor.processText(event.Text, meta.ChatID); err != nil {
 			return myErr("can't process message: %w", err)
 		}
 	}
+
+	// if strings.Contains(event.Text, "/") {
+	// 	if err := eventProcessor.doCmd(event.Text, meta.ChatID, meta.Username); err != nil {
+	// 		return myErr("can't process message: %w", err)
+	// 	}
+	// } else {
+	// 	if err := eventProcessor.sendTestGenerationImage(event.Text, meta.ChatID); err != nil {
+	// 		return myErr("can't process message: %w", err)
+	// 	}
+	// }
 
 	return nil
 }
